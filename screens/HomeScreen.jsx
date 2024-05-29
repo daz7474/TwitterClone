@@ -122,7 +122,9 @@ export default function HomeScreen({navigation}) {
         data={DATA}
         renderItem={renderItem}
         keyExtractor={item => item.id}
-        ItemSeparatorComponent={() => <View style={styles.tweetSeparator}></View>}
+        ItemSeparatorComponent={() => (
+          <View style={styles.tweetSeparator}></View>
+        )}
       />
 
       <TouchableOpacity
