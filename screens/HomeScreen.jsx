@@ -191,6 +191,6 @@ const styles = StyleSheet.create({
     right: 12,
   },
   ml4: {
-    marginLeft: 8,
+    marginLeft: 16,
   }
 });
