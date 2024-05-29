@@ -55,8 +55,9 @@ export default function HomeScreen({navigation}) {
     <View style={styles.tweetContainer}>
       <TouchableOpacity onPress={() => gotoProfile()}>
         <Image style={styles.avatar} source={{
-          uri: 'https://reactnative.dev/img/tiny_logo.png'
-        }} />
+            uri: 'https://reactnative.dev/img/tiny_logo.png'
+          }} 
+        />
       </TouchableOpacity>
       <View style={{ flex: 1}}>
         <TouchableOpacity style={styles.flexRow} onPress={() => gotoSingleTweet()}>
