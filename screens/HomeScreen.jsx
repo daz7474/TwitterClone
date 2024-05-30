@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, Platform, ActivityIndicator } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { EvilIcons, AntDesign } from '@expo/vector-icons';
@@ -7,16 +7,44 @@ import { formatDistanceToNowStrict } from 'date-fns';
 import locale from 'date-fns/locale/en-US';
 import formatDistance from '../helpers/formatDistanceCustom';
 
-export default function HomeScreen({navigation}) {
+export default function HomeScreen({ route, navigation }) {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [isAtEndOfScrolling, setIsAtEndOfScrolling] = useState(false);
+  const flatListRef = useRef();
 
   useEffect(() => {
     getAllTweets();
   }, [page]);
+
+  useEffect(() => {
+    if (route.params?.newTweetAdded) {
+      getAllTweetsRefresh();
+      flatListRef.current.scrollToOffset({
+        offset: 0,
+      });
+    }
+  }, [route.params?.newTweetAdded]);
+
+  function getAllTweetsRefresh() {
+    setPage(1);
+    setIsAtEndOfScrolling(false);
+    setIsRefreshing(false);
+
+    axiosConfig.get(`/tweets`)
+      .then(response => {
+        setData(response.data.data);
+        setIsLoading(false);
+        setIsRefreshing(false);
+      })
+      .catch(error => {
+        console.log(error);
+        setIsLoading(false);
+        setIsRefreshing(false);
+      })
+  };
 
   function getAllTweets() {
     axiosConfig.get(`/tweets?page=${page}`)
@@ -151,6 +179,7 @@ export default function HomeScreen({navigation}) {
         <ActivityIndicator style={{ marginTop: 8 }} size="large" color="gray" />
         ) : (
         <FlatList
+          ref={flatListRef}
           data={data}
           renderItem={renderItem}
           keyExtractor={item => item.id.toString()}
