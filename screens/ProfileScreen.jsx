@@ -1,43 +1,30 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, Linking, FlatList} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, Linking, FlatList, ActivityIndicator} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { EvilIcons } from '@expo/vector-icons';
+import axiosConfig from '../helpers/axiosConfig';
+import { format } from 'date-fns';
 
-export default function ProfileScreen() {
-  const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'First Item',
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Second Item',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571e29d72',
-      title: 'Third Item',
-    },
-    {
-      id: '58694a0f-3daa1-471f-bd96-145571e29d3',
-      title: 'Fourth Item',
-    },
-    {
-      id: '58694a0f-3da31-471f-bd96-145571e29324',
-      title: 'Fifth Item',
-    },
-    {
-      id: '58694a0f-3d4a1-471f-bd96-145571e293242',
-      title: 'Sixth Item',
-    },
-    {
-      id: '58694a0f-3d4a12-471f-bd96-145571e29324',
-      title: 'Seventh Item',
-    },
-    {
-      id: '58694a0f-3d4a31-471f-bd96-145571e29322',
-      title: 'Eighth Item',
-    },
-  ];
+export default function ProfileScreen({ route, navigation }) {
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    getUserProfile();
+  }, []);
+
+  function getUserProfile() {
+    axiosConfig.get(`/users/${route.params.userId}`)
+      .then(response => {
+        setUser(response.data);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.log(error);
+        setIsLoading(false);
+        setIsRefreshing(false);
+      })
+  };
 
   const renderItem = ({ item }) => (
     <View style={{ marginVertical: 20 }}>
@@ -47,6 +34,10 @@ export default function ProfileScreen() {
 
   const ProfileHeader = () => (
     <View style={styles.container}>
+      {isLoading ? (
+        <ActivityIndicator style={{ marginTop: 8 }} size="large" color="gray" />
+      ) : (
+      <>
       {/* Profile Background Image */}
       <Image style={styles.backgroundImage} source={{
           uri: 'https://images.unsplash.com/photo-1557683316-973673baf926?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80'
@@ -56,7 +47,7 @@ export default function ProfileScreen() {
       {/* Avatar */}
       <View style={styles.avatarContainer}>
         <Image style={styles.avatar} source={{
-            uri: 'https://reactnative.dev/img/tiny_logo.png'
+            uri: user.avatar
           }} 
         />
 
@@ -70,17 +61,17 @@ export default function ProfileScreen() {
       {/* Profile Name */}
       <View style={styles.nameContainer}>
           <Text style={styles.profileName}>
-            Andre Madarang
+            {user.name}
           </Text>
           <Text style={styles.profileHandle}>
-            @drehimself
+            @{user.username}
           </Text>
       </View>
 
       {/* Profile About */}
       <View style={styles.profileContainer}>
           <Text style={styles.profileContainerText}>
-            CEO of CEOs. PhD, MSc, SEO, HTML, CSS, JS Evangelist Pro Expert S Rank Elite Best of the best.
+            {user.profile}
           </Text>
       </View>
 
@@ -92,7 +83,7 @@ export default function ProfileScreen() {
           color="gray" 
         />
         <Text style={styles.textGray}>
-          Toronto, Canada
+          {user.location}
         </Text>
       </View>
 
@@ -100,11 +91,11 @@ export default function ProfileScreen() {
       <View style={styles.linkContainer}>
         <TouchableOpacity
           style={styles.linkItem}
-          onPress={() => Linking.openURL('https://laracasts.com')}
+          onPress={() => Linking.openURL(user.link)}
         >
           <EvilIcons name="link" size={24} color="gray" />
           <Text style={styles.linkColor}>
-            laracasts.com
+            {user.linkText}
           </Text>
         </TouchableOpacity>
 
@@ -115,7 +106,7 @@ export default function ProfileScreen() {
             color="gray" 
           />
           <Text style={styles.textGray}>
-            Joined March 2009
+            Joined {format(new Date(user.created_at), 'MMM yyyy')}
           </Text>
         </View>
       </View>
@@ -143,13 +134,15 @@ export default function ProfileScreen() {
 
       <View style={styles.separator}></View>
 
+      </>
+      )}
     </View>
   );
 
   return (
     <FlatList
       style={styles.container}
-      data={DATA}
+      data={user}
       renderItem={renderItem}
       keyExtractor={item => item.id}
       ItemSeparatorComponent={() => (
