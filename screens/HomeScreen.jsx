@@ -1,43 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, Platform } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { EvilIcons, AntDesign } from '@expo/vector-icons';
+import axios from 'axios';
+import { formatDistanceToNowStrict } from 'date-fns';
+import locale from 'date-fns/locale/en-US';
+import formatDistance from '../helpers/formatDistanceCustom';
 
 export default function HomeScreen({navigation}) {
-  const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'First Item',
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Second Item',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571e29d72',
-      title: 'Third Item',
-    },
-    {
-      id: '58694a0f-3daa1-471f-bd96-145571e29d3',
-      title: 'Fourth Item',
-    },
-    {
-      id: '58694a0f-3da31-471f-bd96-145571e29324',
-      title: 'Fifth Item',
-    },
-    {
-      id: '58694a0f-3d4a1-471f-bd96-145571e293242',
-      title: 'Sixth Item',
-    },
-    {
-      id: '58694a0f-3d4a12-471f-bd96-145571e29324',
-      title: 'Seventh Item',
-    },
-    {
-      id: '58694a0f-3d4a31-471f-bd96-145571e29322',
-      title: 'Eighth Item',
-    },
-  ];
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    getAllTweets();
+  }, []);
+
+  function getAllTweets() {
+    axios.get('http://k2phprapb6.sharedwithexpose.com/tweets')
+      .then(response => {
+        setData(response.data);
+      })
+      .catch(error => {
+        console.log(error);
+      })
+  };
 
   function gotoProfile() {
     navigation.navigate('Profile Screen');
@@ -51,25 +36,39 @@ export default function HomeScreen({navigation}) {
     navigation.navigate('New Tweet');
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item: tweet }) => (
     <View style={styles.tweetContainer}>
       <TouchableOpacity onPress={() => gotoProfile()}>
         <Image style={styles.avatar} source={{
-            uri: 'https://reactnative.dev/img/tiny_logo.png'
+            uri: tweet.user.avatar,
           }} 
         />
       </TouchableOpacity>
       <View style={{ flex: 1}}>
         <TouchableOpacity style={styles.flexRow} onPress={() => gotoSingleTweet()}>
-          <Text numberofLines={1} style={styles.tweetName}>{item.title}</Text>
-          <Text numberofLines={1} style={styles.tweetHandle}>@drehimself</Text>
+          <Text numberofLines={1} style={styles.tweetName}>
+            {tweet.user.name}
+          </Text>
+
+          <Text numberofLines={1} style={styles.tweetHandle}>
+            @{tweet.user.username}
+          </Text>
+
           <Text>&middot;</Text>
-          <Text numberofLines={1} style={styles.tweetHandle}>9m</Text>
+
+          <Text numberofLines={1} style={styles.tweetHandle}>
+            {formatDistanceToNowStrict(new Date(tweet.created_at), {
+              locale: {
+                ...locale,
+                formatDistance,
+              }
+            })}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tweetContentContainer} onPress={() => gotoSingleTweet()}>
           <Text style={styles.tweetContent}>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Placeat nulla ab facere tenetur distinctio veniam ipsa sint deserunt, aspernatur laudantium?
+          {tweet.body}
           </Text>
         </TouchableOpacity>
 
@@ -119,7 +118,7 @@ export default function HomeScreen({navigation}) {
   return (
     <View style={styles.container}>
       <FlatList
-        data={DATA}
+        data={data}
         renderItem={renderItem}
         keyExtractor={item => item.id}
         ItemSeparatorComponent={() => (
