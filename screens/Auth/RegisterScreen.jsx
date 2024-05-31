@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, StyleSheet, Button, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -76,3 +76,45 @@ export default function RegisterScreen({ navigation }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#1d9bf1',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 100,
+    height: 120,
+  },
+  inputBox: {
+    backgroundColor: 'white',
+    borderRadius: 5,
+    padding: 10,
+  },
+  loginButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0084b3',
+    padding: 12,
+    borderRadius: 5,
+   },
+   loginButtonText: {
+    color: 'white',
+   },
+   registerText: {
+    fontSize: 12,
+   },
+   registerTextLink: {
+    fontSize: 12,
+    color: 'white',
+    textDecorationLine: 'underline',
+   },
+  mt4: {
+    marginTop: 16,
+  },
+  mt5: {
+    marginTop: 22,
+ },
+});
