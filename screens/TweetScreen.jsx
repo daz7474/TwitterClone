@@ -1,13 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, Platform, ActivityIndicator} from 'react-native';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Image, Platform, ActivityIndicator, Alert} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { EvilIcons, Entypo } from '@expo/vector-icons';
+import { EvilIcons, Entypo, AntDesign } from '@expo/vector-icons';
 import axiosConfig from '../helpers/axiosConfig';
 import { format } from 'date-fns';
+import { Modalize } from 'react-native-modalize';
+import { AuthContext } from '../context/AuthProvider';
 
 export default function TweetScreen({ route, navigation }) {
   const [tweet, setTweet] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const modalizeRef = useRef(null);
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     getTweet();
@@ -17,13 +21,44 @@ export default function TweetScreen({ route, navigation }) {
     axiosConfig.get(`/tweets/${route.params.tweetId}`)
       .then(response => {
         setTweet(response.data);
-
         setIsLoading(false);
       })
       .catch(error => {
         console.log(error);
         setIsLoading(false);
       })
+  };
+
+  function deleteTweet() {
+    axiosConfig.defaults.headers.common[
+      'Authorization'
+    ] = `Bearer ${user.token}`;
+    
+    axiosConfig.delete(`/tweets/${route.params.tweetId}`)
+      .then(response => {
+        Alert.alert('Tweet was deleted.');
+        navigation.navigate('Home1', {
+          tweetDeleted: true,
+        });
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+
+  function showAlert() {
+    Alert.alert('Delete this tweet?', null, [
+      {
+        text: 'Cancel',
+        onPress: () => modalizeRef.current?.close(),
+        style: 'cancel,'
+      },
+      {
+        text: 'OK',
+        onPress: () => deleteTweet(),
+        style: 'default,'
+      },
+    ]);
   };
 
   function gotoProfile(userId) {
@@ -53,9 +88,11 @@ export default function TweetScreen({ route, navigation }) {
         </View>
       </TouchableOpacity>
 
-        <TouchableOpacity>
-          <Entypo name="dots-three-vertical" size={24} color="gray" />
-        </TouchableOpacity>
+        {user.id == tweet.user.id && (
+          <TouchableOpacity onPress={() => modalizeRef.current?.open()}>
+            <Entypo name="dots-three-vertical" size={24} color="gray" />
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.tweetContentContainer}>
@@ -144,6 +181,20 @@ export default function TweetScreen({ route, navigation }) {
           />
         </TouchableOpacity>
       </View>
+
+      <Modalize ref={modalizeRef} snapPoint={200}>
+        <View style={{ paddingHorizontal: 24, paddingVertical: 32 }}>
+          <TouchableOpacity style={styles.menuButton}>
+            <AntDesign name='pushpino' size={24} color='#222' />
+            <Text style={styles.menuButtonText}>Pin Tweet</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={showAlert} style={[styles.menuButton, styles.mt6]}>
+            <AntDesign name='delete' size={24} color='#222' />
+            <Text style={styles.menuButtonText}>Delete Tweet</Text>
+          </TouchableOpacity>
+        </View>
+      </Modalize>
       </>
       )}
     </View>
@@ -219,5 +270,17 @@ const styles = StyleSheet.create({
   },
   ml4: {
     marginLeft: 16,
-  }
+  },
+  mt6: {
+    marginTop: 32,
+  },
+  menuButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuButtonText: {
+    fontSize: 20,
+    color: '#222',
+    marginLeft: 12,
+  },
 });

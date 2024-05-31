@@ -30,7 +30,7 @@ export default function ProfileScreen({ route, navigation }) {
   function getIsFollowing() {
     axiosConfig.defaults.headers.common[
       'Authorization'
-    ] = 'Bearer ${userFromContext.token}';
+    ] = `Bearer ${userFromContext.token}`;
 
     axiosConfig.get(`/is_following/${route.params.userId}`)
       .then(response => {
@@ -44,7 +44,7 @@ export default function ProfileScreen({ route, navigation }) {
   function followUser(userId) {
     axiosConfig.defaults.headers.common[
       'Authorization'
-    ] = 'Bearer ${userFromContext.token}';
+    ] = `Bearer ${userFromContext.token}`;
 
     axiosConfig.post(`/follow/${route.params.userId}`)
       .then(response => {
@@ -59,7 +59,7 @@ export default function ProfileScreen({ route, navigation }) {
   function unfollowUser(userId) {
     axiosConfig.defaults.headers.common[
       'Authorization'
-    ] = 'Bearer ${userFromContext.token}';
+    ] = `Bearer ${userFromContext.token}`;
 
     axiosConfig.post(`/unfollow/${route.params.userId}`)
       .then(response => {

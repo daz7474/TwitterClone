@@ -20,13 +20,13 @@ export default function HomeScreen({ route, navigation }) {
   }, [page]);
 
   useEffect(() => {
-    if (route.params?.newTweetAdded) {
+    if (route.params?.newTweetAdded || route.params?.tweetDeleted) {
       getAllTweetsRefresh();
       flatListRef.current.scrollToOffset({
         offset: 0,
       });
     }
-  }, [route.params?.newTweetAdded]);
+  }, [route.params?.newTweetAdded, route.params?.tweetDeleted]);
 
   function getAllTweetsRefresh() {
     setPage(1);
@@ -35,7 +35,7 @@ export default function HomeScreen({ route, navigation }) {
 
     axiosConfig.defaults.headers.common[
       'Authorization'
-    ] = 'Bearer ${user.token}';
+    ] = `Bearer ${user.token}`;
 
     axiosConfig.get(`/tweets`)
       .then(response => {
@@ -53,7 +53,7 @@ export default function HomeScreen({ route, navigation }) {
   function getAllTweets() {
     axiosConfig.defaults.headers.common[
       'Authorization'
-    ] = 'Bearer ${user.token}';
+    ] = `Bearer ${user.token}`;
     axiosConfig.get(`/tweets?page=${page}`)
       .then(response => {
         if (page === 1) {
