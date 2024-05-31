@@ -1,60 +1,69 @@
 import React, { useContext, useState } from "react";
-import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AuthContext } from "../../context/AuthProvider";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useContext(AuthContext);
+  const { login, error, isLoading } = useContext(AuthContext);
 
   return (
     <View style={styles.container}>
       <View style={{ marginTop: 130, width: 260 }}>
         <View style={{ alignItems: 'center' }}>
-          <Image style={styles.logo} source={require('../../assets/larydefault.png')} />
+          <Image
+            style={styles.logo}
+            source={require('../../assets/larydefault.png')}
+          ></Image>
         </View>
         <View style={{ marginTop: 40 }}>
+          {error && <Text style={{ color: 'red' }}>{error}</Text>}
           <TextInput
-            style={[ styles.inputBox, styles.mt4]}
+            style={[styles.inputBox, styles.mt4]}
             onChangeText={setEmail}
             value={email}
             placeholder="Email"
-            placeholderTextColor='gray'
+            placeholderTextColor="gray"
             textContentType="emailAddress"
             keyboardType="email-address"
             autoCapitalize="none"
           />
-
           <TextInput
-            style={[ styles.inputBox, styles.mt4]}
+            style={[styles.inputBox, styles.mt4]}
             onChangeText={setPassword}
             value={password}
             placeholder="Password"
-            placeholderTextColor='gray'
+            placeholderTextColor="gray"
             autoCapitalize="none"
             secureTextEntry={true}
           />
         </View>
-
         <TouchableOpacity
           onPress={() => login(email, password)}
           style={[styles.loginButton, styles.mt5]}
         >
-          <Text style={styles.loginButtonText}>
-            Login
-          </Text>
+          {isLoading && (
+            <ActivityIndicator
+              style={{ marginRight: 18 }}
+              size="small"
+              color="white"
+            />
+          )}
+          <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
 
-        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 12 }}>
-          <Text style={styles.registerText}>
-              Don't have an account?
-          </Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 12,
+          }}
+        >
+          <Text style={styles.registerText}>Don't have an account?</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate('Register Screen')}
           >
-            <Text style={styles.registerTextLink}>
-              Register
-            </Text>
+            <Text style={styles.registerTextLink}> Register</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -90,6 +99,7 @@ const styles = StyleSheet.create({
    },
    registerText: {
     fontSize: 12,
+    marginRight: 8,
    },
    registerTextLink: {
     fontSize: 12,

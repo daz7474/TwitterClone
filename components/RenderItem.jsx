@@ -1,6 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, Platform} from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Platform} from 'react-native';
 import { EvilIcons } from '@expo/vector-icons';
 import { formatDistanceToNowStrict } from 'date-fns';
 import locale from 'date-fns/locale/en-US';

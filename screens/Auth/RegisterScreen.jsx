@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import axiosConfig from '../../helpers/axiosConfig';
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -11,69 +12,116 @@ export default function RegisterScreen({ navigation }) {
   const [error, setError] = useState(null);
 
   function register(email, username, password, confirmPassword) {
-    Alert.alert('Register Logic here');
+    if (name.length < 1) {
+      Alert.alert('Please enter a name');
+      return;
+    }
+
+    setIsLoading(true);
+    axiosConfig.post('/register', {
+      name,
+      email,
+      username,
+      password,
+      password_confirmation: confirmPassword
+    })
+    .then(response => {
+      Alert.alert('User created! Please login.');
+      navigation.navigate('Login Screen');
+
+      setIsLoading(false);
+      setError(null);
+    })
+    .catch(error => {
+      const key = Object.keys(error.response.data.errors)[0];
+      setError(error.response.data.errors[key][0]);
+      setIsLoading(false);
+    });
   }
 
   return (
     <View style={styles.container}>
-      <View style={{ marginTop: 130, width: 260 }}>
-        <View style={{ alignItems: 'center' }}>
-          <Image style={styles.logo} source={require('../../assets/larydefault.png')} />
-        </View>
-        <View style={{ marginTop: 40 }}>
-          <TextInput
-            style={[ styles.inputBox, styles.mt4]}
-            onChangeText={setEmail}
-            value={email}
-            placeholder="Email"
-            placeholderTextColor='gray'
-            textContentType="emailAddress"
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
+    <View style={{ marginTop: 130, width: 260 }}>
+      <View style={{ alignItems: 'center' }}>
+        <Image
+          style={styles.logo}
+          source={require('../../assets/larydefault.png')}
+        />
+      </View>
+      <View style={{ marginTop: 40 }}>
+        {error && <Text style={{ color: 'red' }}>{error}</Text>}
+        <TextInput
+          style={[styles.inputBox, styles.mt4]}
+          onChangeText={setName}
+          value={name}
+          placeholder="Name"
+          placeholderTextColor="gray"
+        />
+        <TextInput
+          style={[styles.inputBox, styles.mt4]}
+          onChangeText={setEmail}
+          value={email}
+          placeholder="Email"
+          placeholderTextColor="gray"
+          textContentType="emailAddress"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={[styles.inputBox, styles.mt4]}
+          onChangeText={setUsername}
+          value={username}
+          placeholder="Username"
+          placeholderTextColor="gray"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={[styles.inputBox, styles.mt4]}
+          onChangeText={setPassword}
+          value={password}
+          placeholder="Password"
+          placeholderTextColor="gray"
+          autoCapitalize="none"
+          secureTextEntry={true}
+        />
+        <TextInput
+          style={[styles.inputBox, styles.mt4]}
+          onChangeText={setConfirmPassword}
+          value={confirmPassword}
+          placeholder="Confirm Password"
+          placeholderTextColor="gray"
+          autoCapitalize="none"
+          secureTextEntry={true}
+        />
+      </View>
 
-          <TextInput
-            style={[ styles.inputBox, styles.mt4]}
-            onChangeText={setPassword}
-            value={password}
-            placeholder="Password"
-            placeholderTextColor='gray'
-            autoCapitalize="none"
-            secureTextEntry={true}
+      <TouchableOpacity
+        onPress={() => register(email, username, password, confirmPassword)}
+        style={[styles.loginButton, styles.mt5]}
+      >
+        {isLoading && (
+          <ActivityIndicator
+            size="small"
+            color="white"
+            style={{ marginRight: 18 }}
           />
-        </View>
-
-        <TouchableOpacity
-          onPress={() => login(email, password)}
-          style={[styles.loginButton, styles.mt5]}
-        >
-          <Text style={styles.loginButtonText}>
-            Login
-          </Text>
+        )}
+        <Text style={styles.loginButtonText}>Register</Text>
+      </TouchableOpacity>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          marginTop: 12,
+        }}
+      >
+        <Text style={[styles.registerText]}>Already have an account?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Login Screen')}>
+          <Text style={styles.registerTextLink}> Login</Text>
         </TouchableOpacity>
-
-        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 12 }}>
-          <Text style={styles.registerText}>
-              Don't have an account?
-          </Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Register Screen')}
-          >
-            <Text style={styles.registerTextLink}>
-              Register
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-            onPress={() => navigation.navigate('Login Screen')}
-          >
-            <Text style={styles.registerTextLink}>
-              Register
-            </Text>
-          </TouchableOpacity>
       </View>
     </View>
+  </View>
   );
 }
 
@@ -99,22 +147,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#0084b3',
     padding: 12,
     borderRadius: 5,
-   },
-   loginButtonText: {
+  },
+  loginButtonText: {
     color: 'white',
-   },
-   registerText: {
+  },
+  registerText: {
     fontSize: 12,
-   },
-   registerTextLink: {
+  },
+  registerTextLink: {
     fontSize: 12,
     color: 'white',
     textDecorationLine: 'underline',
-   },
+  },
+  textAlignCenter: {
+    textAlign: 'center',
+  },
   mt4: {
     marginTop: 16,
   },
   mt5: {
     marginTop: 22,
- },
+  },
 });

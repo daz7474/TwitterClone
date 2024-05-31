@@ -1,11 +1,12 @@
 import React, { createContext, useState } from "react";
-import { axiosConfig } from '../helpers/axiosConfig';
+import axiosConfig from '../helpers/axiosConfig';
+import * as SecureStore from 'expo-secure-store';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   return (
@@ -32,10 +33,15 @@ export const AuthProvider = ({ children }) => {
                 email: response.data.user.email,
                 avatar: response.data.user.avatar,
               };
-
               setUser(userResponse);
-              SpeechSynthesisErrorEvent(null);
-            })
+              setError(null);
+              SecureStore.setItemAsync('user', JSON.stringify(userResponse));
+              setIsLoading(false);
+            }).catch(error => {
+              const key = Object.keys(error.response.data.errors)[0];
+              setError(error.response.data.errors[key][0]);
+              setIsLoading(false);
+            });
         },
         logout: () => {
           setIsLoading(true);
@@ -47,9 +53,14 @@ export const AuthProvider = ({ children }) => {
             .then(response => {
               setUser(null);
               SecureStore.deleteItemAsync('user');
-              SpeechSynthesisErrorEvent(null);
+              setError(null);
               setIsLoading(false);
-            })
+            }).catch(error => {
+              setUser(null);
+              SecureStore.deleteItemAsync('user');
+              setError(error.response.data.message);
+              setIsLoading(false);
+            });
         },
       }}
     >
