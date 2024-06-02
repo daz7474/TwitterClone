@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
           setIsLoading(true);
           axiosConfig.defaults.headers.common[
             'Authorization'
-          ] = 'Bearer ${user.token}';
+          ] = `Bearer ${user.token}`;
           axiosConfig
             .post('/logout')
             .then(response => {
